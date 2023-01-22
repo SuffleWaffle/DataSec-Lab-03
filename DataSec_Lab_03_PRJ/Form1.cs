@@ -17,48 +17,108 @@ namespace DataSec_Lab_03_PRJ
             InitializeComponent();
         }
 
-        private void groupBox1_Enter(object sender, EventArgs e)
+        void MyShowToolTip(TextBox tb, byte[] arr)
         {
-            throw new System.NotImplementedException();
+            string binValues = "";
+            
+            for(int i = 0; i < arr.Length; i++)
+            {
+                binValues += Convert.ToString(arr[i], 2)+" ";
+            }
+
+            toolTipHEX.SetToolTip(tb, binValues);
         }
-        
+
+        byte[] myXOR(byte[] textArr , byte[] keyArr)
+        {
+            int textLength = textArr.Length;
+            int keyLength = keyArr.Length;
+            byte[] cipherArr = new byte[textLength];
+            
+            for(int i = 0; i < textLength; i++)
+            {
+                byte p = textArr[i];
+                byte k = keyArr[i % keyLength]; // MOD operation
+                byte c = (byte)(p ^ k); //XOR Operation
+                cipherArr[i] = c;
+            }
+            
+            return cipherArr;
+        }
+
+        string MyCipher(TextBox tbText, TextBox tbKey, TextBox tbCipher, string cipher = "")
+        {
+            string text = tbText.Text;
+            byte[] textArr;
+            
+            if (cipher == "") textArr = Encoding.Unicode.GetBytes(text);
+            else textArr = Encoding.Unicode.GetBytes(cipher);
+            
+            MyShowToolTip(tbText, textArr); //Create tooltip
+            
+            string key = tbKey.Text;
+            byte[] keyArr = Encoding.Unicode.GetBytes(key);
+            
+            MyShowToolTip(tbKey, keyArr); //Create tooltip
+            
+            byte[] cipherArr = myXOR(textArr, keyArr);
+            
+            cipher = Encoding.Unicode.GetString(cipherArr);
+            tbCipher.Text = cipher;
+            
+            MyShowToolTip(tbCipher, cipherArr); //Create tooltip
+            
+            return cipher;
+        }
+
+        string MyCipher(TextBox tbText, TextBox tbCipher, string cipher = "")
+        {
+            string text = tbText.Text;
+            byte[] textArr;
+            
+            if (cipher == "") textArr = Encoding.Unicode.GetBytes(text);
+            else textArr = Encoding.Unicode.GetBytes(cipher);
+            
+            MyShowToolTip(tbText, textArr);
+            
+            cipher = text;
+            tbCipher.Text = cipher;
+            
+            MyShowToolTip(tbCipher, textArr);
+            
+            return cipher;
+        }
+
         private void buttonXOR_Click(object sender, EventArgs e)
         {
-            if(usernameTextBox.Text == "admin" && passwordTextBox.Text == "qwerty1234")
+            string cipher = "";
+            if (string.IsNullOrEmpty(TextBoxKeyIn.Text))
             {
-                MessageBox.Show(
-                    String.Format(
-                        "\tSTATUS: ACCESS GRANTED\n\nINFO: Authorization complete. Welcome back {0}!", 
-                        usernameTextBox.Text
-                    )
-                );
-                signinStatLabel.BackColor = Color.Green;
+                cipher = MyCipher(TextBoxPIn, TextBoxCIn);
+                TextBoxPOut.Text = TextBoxCIn.Text;
+                TextBoxKeyOut.Text = TextBoxKeyIn.Text;
+                MyCipher(TextBoxPOut, TextBoxCOut, cipher); 
+                
+                return;
             }
-            else
-            {
-                MessageBox.Show("\tSTATUS: ACCESS DENIED\n\nINFO: Incorrect username or password.");
-                signinStatLabel.BackColor = Color.Red;
-            }
+            cipher = MyCipher(TextBoxPIn, TextBoxKeyIn, TextBoxCIn); // Encrypt
+            
+            TextBoxPOut.Text = TextBoxCIn.Text;
+            TextBoxKeyOut.Text = TextBoxKeyIn.Text;
+            
+            MyCipher(TextBoxPOut, TextBoxKeyOut, TextBoxCOut, cipher); // Decrypt
         }
-        
+
         private void buttonRESET_Click(object sender, EventArgs e)
         {
-            if(usernameTextBox.Text == "admin" && passwordTextBox.Text == "qwerty1234")
-            {
-                MessageBox.Show(
-                    String.Format(
-                        "\tSTATUS: ACCESS GRANTED\n\nINFO: Authorization complete. Welcome back {0}!", 
-                        usernameTextBox.Text
-                    )
-                );
-                signinStatLabel.BackColor = Color.Green;
-            }
-            else
-            {
-                MessageBox.Show("\tSTATUS: ACCESS DENIED\n\nINFO: Incorrect username or password.");
-                signinStatLabel.BackColor = Color.Red;
-            }
+            TextBoxPIn.Text = "";
+            TextBoxKeyIn.Text = "";
+            TextBoxCIn.Text = "";
+            TextBoxPOut.Text = "";
+            TextBoxKeyOut.Text = "";
+            TextBoxCOut.Text = "";
         }
-        
     }
+
+    
 }
